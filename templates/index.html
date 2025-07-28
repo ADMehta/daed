@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Drug Adverse Event Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 2rem;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        h1 {
+            color: #2c3e50;
+        }
+
+        label,
+        input,
+        select {
+            margin: 0.5rem 0;
+            display: block;
+        }
+
+        input,
+        select {
+            padding: 0.4rem;
+            width: 300px;
+        }
+
+        button {
+            margin: 1rem 0.5rem 1rem 0;
+            padding: 0.5rem 1rem;
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background-color: #3498db;
+        }
+
+        #results,
+        #chart {
+            margin-top: 2rem;
+        }
+
+        pre {
+            background-color: #fff;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        table {
+            background-color: #fff;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #2980b9;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>💊 Drug Adverse Event Dashboard</h1>
+
+    <label for="drug">Select Drug Name:</label>
+    <select id="drug-name">
+        <option value="ASPIRIN">Aspirin</option>
+        <option value="IBUPROFEN">Ibuprofen</option>
+        <option value="PARACETAMOL">Paracetamol</option>
+        <option value="METFORMIN">Metformin</option>
+        <option value="ATORVASTATIN">Atorvastatin</option>
+        <option value="LISINOPRIL">Lisinopril</option>
+        <option value="AMOXICILLIN">Amoxicillin</option>
+        <option value="FLUOXETINE">Fluoxetine</option>
+        <option value="OMEPRAZOLE">Omeprazole</option>
+        <option value="WARFARIN">Warfarin</option>
+    </select>
+
+
+    <label for="seriousness">Filter by Seriousness:</label>
+    <select id="seriousness">
+        <option value="hospitalization">Hospitalization</option>
+        <option value="death">Death</option>
+        <option value="life-threatening">Life-Threatening</option>
+        <option value="disabling">Disabling</option>
+        <option value="congenital-anomaly">Congenital Anomaly</option>
+        <option value="other">Other Serious Medical Event</option>
+    </select>
+
+    <div>
+
+        <button onclick="fetchManufacturers()">Show Top Manufacturers</button>
+        <button onclick="fetchTrends()">Visualize Time Trends</button>
+    </div>
+
+    <div id="results"></div>
+    <div id="chart"></div>
+
+    <script>
+        async function fetchManufacturers() {
+            const drug = document.getElementById("drug-name").value;
+            const url = `/manufacturers?drug=${drug}`;
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                console.log("Manufacturers data:", data);
+
+                const manufacturers = Array.isArray(data.manufacturers) ? data.manufacturers : [];
+
+                if (manufacturers.length > 0) {
+                    let html = `<h2>Top Manufacturers</h2><table><thead><tr><th>Rank</th><th>Manufacturer</th><th>Reports</th></tr></thead><tbody>`;
+                    manufacturers.forEach((m, index) => {
+                        html += `<tr><td>${index + 1}</td><td>${m[0]}</td><td>${m[1]}</td></tr>`;
+                    });
+                    html += `</tbody></table>`;
+                    document.getElementById("results").innerHTML = html;
+                } else {
+                    document.getElementById("results").innerHTML = `<p>No manufacturer data found.</p>`;
+                }
+
+            } catch (err) {
+                console.error("Manufacturers fetch error:", err);
+                document.getElementById("results").innerHTML = `<p>Could not fetch manufacturer data.</p>`;
+            }
+        }
+
+        async function fetchTrends() {
+            const drug = document.getElementById("drug-name").value;
+            const url = `/trends?drug=${drug}`;
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                console.log("Trends data:", data);
+
+                const trendObj = data.trend || {};
+                const labels = Object.keys(trendObj).sort();
+                const values = labels.map(date => trendObj[date]);
+
+                if (labels.length > 0) {
+                    const trace = {
+                        x: labels,
+                        y: values,
+                        type: 'scatter',
+                        mode: 'lines+markers',
+                        marker: { color: '#e74c3c' },
+                        line: { shape: 'spline' }
+                    };
+
+                    const layout = {
+                        title: `Adverse Event Trends for ${drug}`,
+                        xaxis: { title: 'Date' },
+                        yaxis: { title: 'Number of Reports' }
+                    };
+
+                    Plotly.newPlot('chart', [trace], layout);
+                } else {
+                    document.getElementById("chart").innerHTML = `<p>No trend data to visualize.</p>`;
+                }
+            } catch (err) {
+                console.error("Trends fetch error:", err);
+                document.getElementById("chart").innerHTML = `<p>Could not fetch trend data.</p>`;
+            }
+        }
+    </script>
+</body>
+
+</html>
