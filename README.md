@@ -46,7 +46,11 @@ python app.py
 # Open browser and visit
 http://127.0.0.1:5000
 
-# Next Steps
-Testing with Positive and Negative Test scenarios
-Verify the count and ranking for each manufacturer
-Polish UI m make it more user friendly.
+# Demo Link:
+https://drive.google.com/file/d/1LCrh8zPVJyODNPNw1sNHv4jqjJum4CJh/view?usp=sharing
+
+### Next Steps
+Test with Positive and Negative Test scenarios
+Verify the count, Need code refactoring for manufacture ranking and count aggrigation
+Polish UI to make it more user friendly.
+Error Handling
