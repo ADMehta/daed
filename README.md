@@ -45,3 +45,8 @@ python app.py
 
 # Open browser and visit
 http://127.0.0.1:5000
+
+# Next Steps
+Testing with Positive and Negative Test scenarios
+Verify the count and ranking for each manufacturer
+Polish UI m make it more user friendly.
